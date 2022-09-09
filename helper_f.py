@@ -7,6 +7,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
 import torchvision
 from tqdm import tqdm
+from typing import Tuple, Dict, List
 import matplotlib.pyplot as plt
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
