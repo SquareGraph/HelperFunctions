@@ -1,3 +1,5 @@
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
 # PyTorch Train,test & eval loop
 # ______________________________________________________________________
 # ________________________EVALUATION MODE_______________________________
