@@ -17,31 +17,33 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 # ________________________EVALUATION MODE_______________________________
 # ______________________________________________________________________
 
-def eval_model(model: torch.nn.Module,  # we want to ensure dtype here
-               data_loader: torch.utils.data.DataLoader,  # data will be fed through the PyTorch DataLoaders
-               loss_fn: torch.nn.Module,  # ensuring dtype of loss function
-               accuracy_fn, device: torch.device = device):  # device agnostic code
+def eval_model(model: torch.nn.Module, #we want to ensure dtype here
+               data_loader: torch.utils.data.DataLoader, #data will be fed through the PyTorch DataLoaders
+               loss_fn: torch.nn.Module, #ensuring dtype of loss function
+               accuracy_fn, device:torch.device=device): #device agnostic code
     """ Return a dictionary containing the results of model prediction on data_loader """
 
-    loss, acc = 0, 0  # starting values for each of the params
-    model.eval()  # turning evaluation mode (we don't need to calc grad here)
-    with torch.inference_mode():  # context manager for above
-        for X, y in tqdm(data_loader):  # evaluation for loop with tqdm progress bar
+    loss, acc = 0,0 #starting values for each of the params
+    preds = []
+    model.eval() #turning evaluation mode (we don't need to calc grad here)
+    with torch.inference_mode(): #context manager for above
+        for X,y in tqdm(data_loader): #evaluation for loop with tqdm progress bar
 
-            X, y = X.to(device), y.to(device)  # sending X and y to the same device as model, preferable cuda
+            X,y = X.to(device), y.to(device) #sending X and y to the same device as model, preferable cuda
 
-            y_preds = model(X)  # feeding X's to the model
+            y_preds = model(X) #feeding X's to the model
+            preds.append(y_preds)
 
-            loss += loss_fn(y_preds, y)  # calculate and accumulate loss
-            acc += accuracy_fn(y_preds.argmax(dim=1), y)  # same for accuracy
+            loss += loss_fn(y_preds, y) #calculate and accumulate loss
+            acc += accuracy_fn(y_preds.argmax(dim=1), y) #same for accuracy
 
-        loss /= len(
-            data_loader)  # outside of a for loop let's devide accumulated stats by a length of a datastream to get the mean.
-        acc /= len(data_loader)  # same.
+        loss /= len(data_loader) #outside of a for loop let's devide accumulated stats by a length of a datastream to get the mean.
+        acc /= len(data_loader) # same.
 
     return {"model_name": model.__class__.__name__,
             "model_loss": loss.item(),
-            "model_acc": acc.item()}  # return dictionary of loss and accuracy of a model.
+            "model_acc": acc.item(),
+            "model_preds":preds} #return dictionary of loss and accuracy of a model.
 
 # ______________________________________________________________________
 # ________________________TRAIN STEP_______________________________
